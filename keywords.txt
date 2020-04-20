@@ -1,0 +1,37 @@
+###########################################
+# Syntax Coloring TPL0102 Library
+###########################################
+
+###########################################
+# Datatypes (KEYWORD1)
+###########################################
+
+TPL0102	KEYWORD1
+
+###########################################
+# Methods and Functions (KEYWORD2)
+###########################################
+
+setup				KEYWORD2
+begin				KEYWORD2
+taps				KEYWORD2
+wiper				KEYWORD2
+inc					KEYWORD2
+dec					KEYWORD2
+zeroWiper			KEYWORD2
+maxWiper			KEYWORD2
+readValue			KEYWORD2
+setValue			KEYWORD2
+incMicros			KEYWORD2
+decMicros			KEYWORD2
+setMicros			KEYWORD2
+
+###########################################
+# Constants (LITERAL1)
+###########################################
+
+address				LITERAL1
+nominal				LITERAL1
+POT_LABELS			LITERAL1
+REGISTER_LABELS		LITERAL1
+NOMINAL_RESISTANCE	LITERAL1
