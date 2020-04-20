@@ -1,7 +1,7 @@
 
 /*
-    Microchip 64 taps Single Digital Potentiometer
-    Simple two-wire UP/DOWN interface
+    Texas Instruments TPL0102 256 taps Dual Digital Potentiometer
+    I2C interface
     Author: Daniel Melendrez
     Date: March 2020 (COVID-19 Vibes)
     Version: 0.1
