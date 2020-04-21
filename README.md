@@ -6,7 +6,7 @@ Hiya!
 
 I am thrilled to share with you my version of the library for communicating and controlling the [TPL0102](http://www.ti.com/lit/ds/slis134c/slis134c.pdf) from Texas Instruments. The library was tested with a 100kOhms device.
 
-It is a compact 14-pin dual 256 taps I2C potentiometer with non-volatible registers. Pretty handy for digitally controlled amplifiers, PID controllers, etc.
+It is a compact 14-pin dual 256 taps I2C potentiometer with non-volatible registers. Pretty handy for digitally controlled amplifiers, PID controllers and in word of the manufacturer: suitable for Adjustable Power Supplies, Precision Calibration of Set Point Thresholds, Sensor Trimming and Calibration, Mechanical, Potentiometer Replacement etc.
 
 Please read and play around with the example codes to get a good grasp of the usability of the library.
 
