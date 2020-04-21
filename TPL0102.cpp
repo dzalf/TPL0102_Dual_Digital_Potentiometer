@@ -1,22 +1,22 @@
 
 /*
-    Texas Instruments TPL0102 256 taps Dual Digital Potentiometer
-    I2C interface
+    Microchip 64 taps Single Digital Potentiometer
+    Simple two-wire UP/DOWN interface
     Author: Daniel Melendrez
     Date: March 2020 (COVID-19 Vibes)
-    Version: 0.1
+    Version history:    0.1 - March 18 - Initial commit
+                        0.2 - March 18 - Added FAST mode to the I2C comm: help to set the value in less than 100 usec
+    License: MIT
 
 */
 
 #include "TPL0102.h"
 
- 
-
 // Constructors
 
 TPL0102::TPL0102() {
 
- _debug = false;
+  _debug = false;
 
 }
 
@@ -28,26 +28,25 @@ TPL0102::TPL0102(bool DEBUG) {
 
 // Methods
 
-void TPL0102::begin(uint16_t addr) {
-  
+void TPL0102::begin(uint16_t addr, uint32_t speed) {
+
   Wire.begin();
+  Wire.setClock(speed);
 
   address = addr;
-  // I need to assign the previous value!
-  readRegistersStatus();
-  
+
+  readRegistersStatus(); // The read the values that were set during the last power on
+
   _tapPointer[0] = _initialState[0];
   _tapPointer[1] = _initialState[1];
 
-  if(_debug){
+  if (_debug) {
 
-  Serial.println(F("Initial values:"));
-  
-  for(int i = 0; i < 2; i++){
+    Serial.println(F("Initial values:"));
 
-  
-    Serial.print (POT_LABELS[i]);
-    Serial.println(_tapPointer[i]);
+    for (int i = 0; i < 2; i++) {
+      Serial.print (POT_LABELS[i]);
+      Serial.println(_tapPointer[i]);
     }
   }
 
@@ -61,7 +60,7 @@ float TPL0102:: wiper(uint8_t ch) {
 
 /* Switchs ON/OFF the device*/
 
-void TPL0102::switchPot(uint8_t ch, uint8_t st){
+void TPL0102::switchPot(uint8_t ch, uint8_t st) {
 
   char ACR_VALUE = 0;
   uint8_t SHDN_INSTR = 0;
@@ -93,7 +92,7 @@ void TPL0102::switchPot(uint8_t ch, uint8_t st){
 
       break;
 
-      default:
+    default:
 
       SHDN_INSTR =  ACR_VALUE  | 0x00; // Same state
 
@@ -122,7 +121,7 @@ void TPL0102::inc(uint8_t ch) {    // return wiper count!
 
     dataWrite(ch, _tapPointer[ch]);
 
-    if(_debug){
+    if (_debug) {
 
       Serial.print(F("Current step "));
 
@@ -130,7 +129,7 @@ void TPL0102::inc(uint8_t ch) {    // return wiper count!
       Serial.println(_tapPointer[ch]);
 
     }
- 
+
     _incDelay = micros() - _startIncTime;
 
   }
@@ -146,15 +145,15 @@ void TPL0102::dec(uint8_t ch) {
 
     _tapPointer[ch]--;
 
-     if (_tapPointer[ch] <= 0)
+    if (_tapPointer[ch] <= 0)
       _tapPointer[ch] = 0;
 
     dataWrite(ch, _tapPointer[ch]);
 
-    if(_debug){
+    if (_debug) {
 
       Serial.print(F("Current step "));
-     
+
       Serial.print(POT_LABELS[ch]);
       Serial.println(_tapPointer[ch]);
     }
@@ -165,25 +164,29 @@ void TPL0102::dec(uint8_t ch) {
 
 }
 
-void TPL0102::dataWrite(uint8_t ch, uint8_t val){
+/* This is the general function for sending data to the device. 
+    to use it as a method for writing data bytes on the general purpose registers located between 0x02 and 0x0E
+*/
+
+void TPL0102::dataWrite(uint8_t ch, uint8_t val) {
 
   uint8_t wiperPointer = WRA;
 
-  switch(ch){
+  switch (ch) {
 
     case 0:
       wiperPointer = WRA;
-    break;
+      break;
 
     case 1:
       wiperPointer = WRB;
-    break;
+      break;
   }
 
-    Wire.beginTransmission(address);
-    Wire.write(wiperPointer);
-    Wire.send(val);    // sends potentiometer value byte
-    Wire.endTransmission(true);     // stop transmitting
+  Wire.beginTransmission(address);
+  Wire.write(wiperPointer);
+  Wire.send(val);    // sends potentiometer value byte
+  Wire.endTransmission(true);     // stop transmitting
 
 }
 
@@ -207,7 +210,7 @@ unsigned long TPL0102::setMicros() {
 
 uint8_t TPL0102::taps(uint8_t ch) {
 
-  return _tapPointer[ch];   // value within [1-64] that points to the taps between resistors [0,63]
+  return _tapPointer[ch];   // value within [0-255] that points to the taps between resistors [1,256]
 }
 
 uint8_t TPL0102::setValue(uint8_t ch, float desiredR) {
@@ -220,17 +223,17 @@ uint8_t TPL0102::setValue(uint8_t ch, float desiredR) {
   tapTarget = round((desiredR * TAP_NUMBER) / NOMINAL_RESISTANCE);
   distance = abs(_tapPointer[ch] - tapTarget);
 
-  if (_debug){
+  if (_debug) {
 
-  Serial.print(F("Distance to target: "));
-  Serial.println(distance);
+    Serial.print(F("Distance to target: "));
+    Serial.println(distance);
 
-  Serial.print(F("Target tap: "));
-  Serial.println(tapTarget);
+    Serial.print(F("Target tap: "));
+    Serial.println(tapTarget);
 
   }
 
-   if (tapTarget != _tapPointer[ch]) {
+  if (tapTarget != _tapPointer[ch]) {
 
     dataWrite(ch, tapTarget);
     _tapPointer[ch] = tapTarget;
@@ -248,13 +251,13 @@ uint8_t TPL0102::setValue(uint8_t ch, float desiredR) {
 void TPL0102::zeroWiper(uint8_t ch) {
 
   _tapPointer[ch] = 0;
-  dataWrite(ch, _tapPointer[ch]);
+  dataWrite(ch, _tapPointer[ch]);   // Need to asign it to the tapPointer memory array to keep track of the current value
 
 }
 
 void TPL0102::maxWiper(uint8_t ch) {
 
-    _tapPointer[ch] = TAP_NUMBER;
+  _tapPointer[ch] = TAP_NUMBER;     // Need to asign it to the tapPointer memory array to keep track of the current value
   dataWrite(ch, _tapPointer[ch]);
 
 }
@@ -265,6 +268,9 @@ float TPL0102::readValue(uint8_t ch) {
 
 }
 
+/*
+    Normally used during bootup to check where the pot was left
+*/
 void TPL0102::readRegistersStatus() {
 
   for (int pos = 0; pos < 3; pos++) {
@@ -283,7 +289,7 @@ void TPL0102::readRegistersStatus() {
       if (_debug) {
 
         Serial.println(F(" ******************** "));
-        
+
         Serial.print(REGISTER_LABELS[pos]);
         Serial.print(I2CResponse, HEX);
         Serial.print(F(" (HEX)"));
@@ -312,7 +318,6 @@ void TPL0102::readDummyRegStatus() {
 
     while (Wire.available())   // slave may send less than requested
     {
-
       char I2CResponse = Wire.receive();    // receive a byte as character
 
       if (_debug == true) {
