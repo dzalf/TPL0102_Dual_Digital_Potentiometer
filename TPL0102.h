@@ -1,12 +1,14 @@
-
 /*
-    Texas Instruments TPL0102 256 taps Dual Digital Potentiometer
-    I2C interface
+    Microchip 64 taps Single Digital Potentiometer
+    Simple two-wire UP/DOWN interface
     Author: Daniel Melendrez
     Date: March 2020 (COVID-19 Vibes)
-    Version: 0.1
+    Version history:    0.1 - March 18 - Initial commit
+                        0.2 - March 18 - Added FAST mode to the I2C comm: help to set the value in less than 100 usec
+    License: MIT                
 
 */
+
 
 #ifndef TPL0102_h
 #define TPL0102_h
@@ -20,16 +22,18 @@
 #define NOMINAL_RESISTANCE 97270    // 100000 theoretical --> Real value measured using maxPot method
 #define WIPER_RESISTANCE 39.5   // 75 typical (According to datasheet)
 #define FACTORY_WIPER_POSITION 128.0  //0x80
+#define STANDARD 100000
+#define FAST 400000     // Maximum supported speed
 // Registers
 #define IVRA 0x00 // Initial Value Register por Potentiomenter A: Stores wiper positiom for Pot A
 #define IVRB 0x01 // Initial Value Register por Potentiomenter B: Stores wiper positiom for Pot B
 #define WRA 0x00  // Wiper Resistance Register for Potentiometer A: IVRA loads value to WRA to determine wiper position
 #define WRB 0x01  // Wiper Resistance Register for Potentiometer B: IVRB loads value to WRB to determine wiper position
 #define ACR 0x10  // Access control register: Volatile register to control register access, determine shut-down mode, and read non-volatile write operations
-// B7: VOL[0/1] (W/R) --> 0: Non-volatile registers acessible; 1: Volatile registers accesible
-// B6: ~SHDN[0/1](W/R) --> 0: Shutdown enabled (both pots); 1: Shutdown disabled
-// B5: WIP[0/1](R) --> Non-volatile operation not in progress; 1: Non-volatile operation in progress (not possible to write to WR or ACR while WIP = 1)
-// B4-B0: 0
+                    // B7: VOL[0/1] (W/R) --> 0: Non-volatile registers acessible; 1: Volatile registers accesible
+                    // B6: ~SHDN[0/1](W/R) --> 0: Shutdown enabled (both pots); 1: Shutdown disabled
+                    // B5: WIP[0/1](R) --> Non-volatile operation not in progress; 1: Non-volatile operation in progress (not possible to write to WR or ACR while WIP = 1)
+                    // B4-B0: 0
 #define SHUTDOWN_MASK 0x40 // Turn off bit 6
 #define VOLATILE_REG_ACCESSIBLE 0xC0
 #define NON_VOLATILE_REG_ACCESSIBLE 0x40   // Bitmask: 0x80  (|= (OR to set) or ^= (XOR to remove))
@@ -38,7 +42,6 @@
 
 #define CHA 0
 #define CHB 1
-
 
 class TPL0102 {
 
@@ -50,9 +53,9 @@ class TPL0102 {
 
     //Constants
 
-     // constants
 
    /* Declared here thanks to the GREAT help from my buddies on: https://stackoverflow.com/questions/11072244/c-multiple-definitions-of-a-variable*/
+    
     const char LBL_POT_A[8] PROGMEM = "POT A: ";
     const char LBL_POT_B[8] PROGMEM = "POT B: ";
 
@@ -71,8 +74,9 @@ class TPL0102 {
     // Variables
     
     uint16_t address;
+    uint32_t I2CSpeed = STANDARD;
     // Methods:
-    void begin(uint16_t addr);
+    void begin(uint16_t addr, uint32_t speed);
     uint8_t taps(uint8_t chan);
     float wiper(uint8_t chan);
     void inc(uint8_t chan);
@@ -85,6 +89,7 @@ class TPL0102 {
     unsigned long decMicros(void);
     unsigned long setMicros(void);
     void switchPot(uint8_t chan, uint8_t state);
+    void dataWrite(uint8_t ch, uint8_t val);
 
   private:
 
@@ -98,8 +103,6 @@ class TPL0102 {
     unsigned long _setDelay;
     bool _debug;
    
-
-    void dataWrite(uint8_t ch, uint8_t val);
     void readRegistersStatus(void);
     void readDummyRegStatus(void);
 
