@@ -12,7 +12,7 @@ Please read and play around with the example codes to get a good grasp of the us
 
 I am aware that there is still a lot to be polished in the code but I will do my best within the following days.
 
-Stay safe and have a go at it.
+Stay safe
 
 Cheers :beer:
 
