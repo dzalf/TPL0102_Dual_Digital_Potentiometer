@@ -18,6 +18,7 @@ taps				KEYWORD2
 wiper				KEYWORD2
 inc					KEYWORD2
 dec					KEYWORD2
+dataWrite				KEYWORD2
 zeroWiper			KEYWORD2
 maxWiper			KEYWORD2
 readValue			KEYWORD2
@@ -25,6 +26,7 @@ setValue			KEYWORD2
 incMicros			KEYWORD2
 decMicros			KEYWORD2
 setMicros			KEYWORD2
+setChannel			KEYWORD2
 
 ###########################################
 # Constants (LITERAL1)
@@ -35,3 +37,5 @@ nominal				LITERAL1
 POT_LABELS			LITERAL1
 REGISTER_LABELS		LITERAL1
 NOMINAL_RESISTANCE	LITERAL1
+STANDARD		LITERAL1
+FAST 			LITERAL1
