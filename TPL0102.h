@@ -5,6 +5,8 @@
     Date: March 2020 (COVID-19 Vibes)
     Version history:    0.1 - March 18 - Initial commit
                         0.2 - March 18 - Added FAST mode to the I2C comm: help to set the value in less than 100 usec
+                        0.3 - May 14   - Included new control over LEDs connected to the Dev Boards that I designed. 
+                                         Now LEDs can be instantiated through new overloaded constructors
     License: MIT                
 
 */
