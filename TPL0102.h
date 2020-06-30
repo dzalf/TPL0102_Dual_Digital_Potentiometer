@@ -5,8 +5,7 @@
     Date: March 2020 (COVID-19 Vibes)
     Version history:    0.1 - March 18 - Initial commit
                         0.2 - March 18 - Added FAST mode to the I2C comm: help to set the value in less than 100 usec
-                        0.3 - May 14   - Included new control over LEDs connected to the Dev Boards that I designed. 
-                                         Now LEDs can be instantiated through new overloaded constructors
+                        0.3 - added a new overloaded setup for overriding the resistance value 
     License: MIT                
 
 */
@@ -18,26 +17,26 @@
 #include <Wire.h>
 #include <avr/pgmspace.h>
 
-#define TAP_NUMBER 255.0           // Total taps, 255 resistors with non-volatile memory. Wiper values are from 0x00 to 0x3F
-#define DEFAULT_TAP_COUNT 128.0     // Half way resistance
-#define NOMINAL_RESISTANCE 97270    // 100000 theoretical --> Real value measured using maxPot method
-#define WIPER_RESISTANCE 39.5   // 75 typical (According to datasheet)
+#define TPL0102_TAP_NUMBER 255.0           // Total taps, 255 resistors with non-volatile memory. Wiper values are from 0x00 to 0x3F
+#define TPL0102_DEFAULT_TAP_COUNT 128.0     // Half way resistance
+#define TPL0102_NOMINAL_RESISTANCE 97270    // 100000 theoretical --> Real value measured using maxPot method
+#define TPL0102_WIPER_RESISTANCE 39.5   // 75 typical (According to the datasheet)
 #define FACTORY_WIPER_POSITION 128.0  //0x80
 #define STANDARD 100000
-#define FAST 400000     // Maximum supported speed
+#define FAST 400000     // Maximum supported I2C speed
 // Registers
-#define IVRA 0x00 // Initial Value Register por Potentiomenter A: Stores wiper positiom for Pot A
-#define IVRB 0x01 // Initial Value Register por Potentiomenter B: Stores wiper positiom for Pot B
+#define IVRA 0x00 // Initial Value Register for Potentiometer A: Stores wiper position for Pot A
+#define IVRB 0x01 // Initial Value Register for Potentiometer B: Stores wiper position for Pot B
 #define WRA 0x00  // Wiper Resistance Register for Potentiometer A: IVRA loads value to WRA to determine wiper position
 #define WRB 0x01  // Wiper Resistance Register for Potentiometer B: IVRB loads value to WRB to determine wiper position
 #define ACR 0x10  // Access control register: Volatile register to control register access, determine shut-down mode, and read non-volatile write operations
-// B7: VOL[0/1] (W/R) --> 0: Non-volatile registers acessible; 1: Volatile registers accesible
+// B7: VOL[0/1] (W/R) --> 0: Non-volatile registers accessible; 1: Volatile registers accessible
 // B6: ~SHDN[0/1](W/R) --> 0: Shutdown enabled (both pots); 1: Shutdown disabled
 // B5: WIP[0/1](R) --> Non-volatile operation not in progress; 1: Non-volatile operation in progress (not possible to write to WR or ACR while WIP = 1)
 // B4-B0: 0
 #define SHUTDOWN_MASK 0x40 // Turn off bit 6
 #define VOLATILE_REG_ACCESSIBLE 0xC0
-#define NON_VOLATILE_REG_ACCESSIBLE 0x40   // Bitmask: 0x80  (|= (OR to set) or ^= (XOR to remove))
+#define NON_VOLATILE_REG_ACCESSIBLE 0x40   // Bit mask: 0x80  (|= (OR to set) or ^= (XOR to remove))
 #define GENERAL_PURPOSE_START 2//0x02
 #define GENERAL_PURPOSE_END   14 //0x0E
 
@@ -67,17 +66,24 @@ class TPL0102 {
     const char *const POT_LABELS[2] PROGMEM = {LBL_POT_A,LBL_POT_B};
     const char *const REGISTER_LABELS[3] PROGMEM = {LBL_REG_IVRA, LBL_REG_IVRB, LBL_REG_ACR};
 
-    const float nominal = NOMINAL_RESISTANCE;
+    const float nominal = TPL0102_NOMINAL_RESISTANCE;
 
-    // Deconstructor
-    //~TPL0102(void);
+    // Destructor 
+
+    ~TPL0102(void);
 
     // Variables
+
+    struct channels{
+      byte A = CHA;
+      byte B = CHB;
+    }channel;
     
     uint16_t address;
     uint32_t I2CSpeed = STANDARD;
     // Methods:
     void begin(uint16_t addr, uint32_t speed);
+    void begin(uint16_t addr, float nominalRes,uint32_t speed);
     uint8_t taps(uint8_t chan);
     float wiper(uint8_t chan);
     void inc(uint8_t chan);
@@ -87,6 +93,7 @@ class TPL0102 {
     uint8_t setChannel(uint8_t chan);
     float readValue(uint8_t chan);
     uint8_t setValue(uint8_t chan, float val);
+    uint8_t setTap(uint8_t chan, uint8_t val);
     unsigned long incMicros(void);
     unsigned long decMicros(void);
     unsigned long setMicros(void);
@@ -108,6 +115,7 @@ class TPL0102 {
     bool _debug;
     bool _ledsDefined;
     uint8_t _prevLEDsState[2];
+    float _nominalResistance;
    
     void readRegistersStatus(void);
     void readDummyRegStatus(void);
