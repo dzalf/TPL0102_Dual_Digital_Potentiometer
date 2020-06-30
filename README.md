@@ -19,6 +19,13 @@ Just updated this to the latest version: 0.3.
 The main intention is to use this library with the breakout/Development Boards soon to be available on [Tindie](https://www.tindie.com/stores/ivorycircuits/). In advance, I can say that there is a tiny mistake on these boards where I accidentally swapped the position of LED_CHA and LED_CHB. Not a big deal, as it can be solved by software. I will make sure that the next version does not have this issue.
 
 
+30-June-20
+
+Updated to version 0.4. 
+New methods and overloaded constructors available. It is possible to override the nominal resistance by setting up the pot with the measured value. 
+Finished testing this library on the prototypes of the PCBs to be sold soon :wink:
+
+
 Stay safe
 
 Cheers :beer:
