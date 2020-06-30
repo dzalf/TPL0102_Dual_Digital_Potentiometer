@@ -5,7 +5,8 @@
 
       Author: Daniel Melendrez
       Code: Example code for library usage. Setting value via the Serial Port
-      Ver: 0.1
+      Ver: 0.1 - initial release
+           0.2 - General cleanup
       Date: March 2020
 */
 
