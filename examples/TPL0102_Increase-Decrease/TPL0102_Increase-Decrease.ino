@@ -3,14 +3,18 @@
       TI TPL0102 Library
 
       Author: Daniel Melendrez
-      Ver: 0.1
-      Date: March 2020
+      Ver: 0.1 - -Initial release
+           0.2 - Minor corrections
+
+      Date: July 2020
 */
 
 #include <TPL0102.h>
 #include <Bounce2.h>
 
 #define TPL0102_ADDRESS 0x50 //0x5x where x is 0-7 according to A2A1A0 (I removed this from header to allow multiple pots in the same I2C bus)
+#define MEASURED_RESISTANCE 99870.0     // Override the nominal value by measuring it
+
 
 /* **** VARIABLES *******************/
 // Floats
@@ -23,17 +27,22 @@ float Res;
 uint8_t chanPtr = 0;
 uint8_t tapNum;
 
-// Ints
+// Integers
 int potState = HIGH;
 
 /*Pins setup */
-// LEDs
+// LEDs for indicating going up or down
 const int upLed = 9;
 const int dwnLed = 10;
+
+// Leds for indicating the current selected channel
+const int ledA = 5;
+const int ledB = 4;
+
 // Push Buttons
 const int pinUp = 6;
 const int pinDwn = 7;
-const int pinSel = 8;
+const int pinSel = 8;     // Attached to a button for changing the channel
 
 /* ***** FLAGS  *********/
 bool debug = false;
@@ -44,7 +53,7 @@ Bounce up = Bounce();
 Bounce dwn = Bounce();
 Bounce sel = Bounce();
 
-TPL0102 pot(debug);
+TPL0102 pot = TPL0102(ledA, ledB, MEASURED_RESISTANCE, debug);
 
 void setup() {
 
@@ -71,14 +80,15 @@ void setup() {
   up.attach(pinUp);
   dwn.attach(pinDwn);
   sel.attach(pinSel);
-  // Define the debouncing time
+
+  // Define the debouncing time for the push button
   up.interval(25);
   dwn.interval(25);
   sel.interval(25);
 
   Serial.println(F("****************************************"));
   Serial.println(F("  TPL0102 256 taps Digital Potentiometer "));
-  Serial.println(F("               LIBRARY ver 0.1           "));
+  Serial.println(F("               LIBRARY Ver. 0.2          "));
   Serial.println(F("*****************************************"));
 
   pot.begin(TPL0102_ADDRESS);
@@ -97,6 +107,8 @@ void loop() {
       if (chanPtr > 1)
         chanPtr = 0;
 
+      pot.setChannel(chanPtr);
+      
       Serial.print(pot.POT_LABELS[chanPtr]);
       Serial.println(pot.taps(chanPtr));
       toggleLeds();
