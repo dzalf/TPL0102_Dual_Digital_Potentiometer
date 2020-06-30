@@ -3,9 +3,11 @@
     Simple two-wire UP/DOWN interface
     Author: Daniel Melendrez
     Date: March 2020 (COVID-19 Vibes)
-    Version history:    0.1 - March 18 - Initial commit
-                        0.2 - March 18 - Added FAST mode to the I2C comm: help to set the value in less than 100 usec
-                        0.3 - added a new overloaded setup for overriding the resistance value 
+    Version history:    0.1 - March - Initial commit
+                        0.2 - March - Added FAST mode to the I2C comm: help to set the value in less than 100 usec
+                        0.3 - June - Two LEDs can be integrated as part of the instantiation. The library manages these as a channel selection indicator.
+                                     This feature is used by the new development boards available in Tindie
+                        0.4 - added a new overloaded setup for overriding the resistance value . General cleanup
     License: MIT                
 
 */
