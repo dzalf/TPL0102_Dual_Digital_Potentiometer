@@ -18,11 +18,12 @@ taps				KEYWORD2
 wiper				KEYWORD2
 inc					KEYWORD2
 dec					KEYWORD2
-dataWrite				KEYWORD2
+dataWrite			KEYWORD2
 zeroWiper			KEYWORD2
 maxWiper			KEYWORD2
 readValue			KEYWORD2
 setValue			KEYWORD2
+setTap				KEYWORD2
 incMicros			KEYWORD2
 decMicros			KEYWORD2
 setMicros			KEYWORD2

@@ -5,13 +5,13 @@
     Date: March 2020 (COVID-19 Vibes)
     Version history:    0.1 - March 18 - Initial commit
                         0.2 - March 18 - Added FAST mode to the I2C comm: help to set the value in less than 100 usec
-                        0.3 - May 14   - Included new control over LEDs connected to the Dev Boards that I designed. 
-                                         Now LEDs can be instantiated through new overloaded constructors
+                        0.3 - added a new overloaded setup for overriding the resistance value 
     License: MIT                
 
 */
 
 #include "TPL0102.h"
+
 
 // Constructors
 
@@ -86,6 +86,7 @@ void TPL0102::begin(uint16_t addr, uint32_t speed) {
   Wire.setClock(speed);
 
   address = addr;
+  _nominalResistance = TPL0102_NOMINAL_RESISTANCE;
   // I need to assign the previous value!
   readRegistersStatus();
   
@@ -93,6 +94,34 @@ void TPL0102::begin(uint16_t addr, uint32_t speed) {
   _tapPointer[1] = _initialState[1];
 
   if(_debug){
+
+  Serial.println(F("Initializing TPL0102..."));
+
+  Serial.println(F("Initial values:"));
+  
+  for(int i = 0; i < 2; i++){
+    Serial.print (POT_LABELS[i]);
+    Serial.println(_tapPointer[i]);
+    }
+  }
+}
+
+void TPL0102::begin(uint16_t addr, float nomRes, uint32_t speed) {
+  
+  Wire.begin();
+  Wire.setClock(speed);
+
+  address = addr;
+  _nominalResistance = nomRes;
+  // I need to assign the previous value!
+  readRegistersStatus();
+  
+  _tapPointer[0] = _initialState[0];
+  _tapPointer[1] = _initialState[1];
+
+  if(_debug){
+
+  Serial.println(F("Initializing TPL0102..."));
 
   Serial.println(F("Initial values:"));
   
@@ -107,11 +136,12 @@ float TPL0102:: wiper(uint8_t ch) {
 
   _selectedChannel = ch;
 
-  return (_tapPointer[ch]) / TAP_NUMBER;
+  return (_tapPointer[ch]) / TPL0102_TAP_NUMBER;
 
 }
 
 /* Switchs ON/OFF the device*/
+
 void TPL0102::switchPot(uint8_t ch, uint8_t st){
 
   _selectedChannel = ch;
@@ -159,20 +189,20 @@ void TPL0102::switchPot(uint8_t ch, uint8_t st){
   Wire.endTransmission(true);     // stop transmitting
 
 }
-// Routine for increasing the pot value
+
 void TPL0102::inc(uint8_t ch) {    // return wiper count!
 
   _selectedChannel = ch;
 
-  if ((_tapPointer[ch] < TAP_NUMBER)) {
+  if ((_tapPointer[ch] < TPL0102_TAP_NUMBER)) {
 
 
     unsigned long _startIncTime = micros();
 
     _tapPointer[ch]++;
 
-    if (_tapPointer[ch] >= TAP_NUMBER)
-      _tapPointer[ch] = TAP_NUMBER;
+    if (_tapPointer[ch] >= TPL0102_TAP_NUMBER)
+      _tapPointer[ch] = TPL0102_TAP_NUMBER;
 
     dataWrite(ch, _tapPointer[ch]);
 
@@ -190,7 +220,7 @@ void TPL0102::inc(uint8_t ch) {    // return wiper count!
   }
 }
 
-// Routine for decreasing the value
+
 void TPL0102::dec(uint8_t ch) {
 
   _selectedChannel = ch;
@@ -218,7 +248,6 @@ void TPL0102::dec(uint8_t ch) {
   }
 }
 
-// Writing data to the user registers
 void TPL0102::dataWrite(uint8_t ch, uint8_t val){
 
   _selectedChannel = ch;
@@ -243,28 +272,24 @@ void TPL0102::dataWrite(uint8_t ch, uint8_t val){
 
 }
 
-// Returns how long it took to increase the value
 unsigned long TPL0102::incMicros() {
 
   return _incDelay;
 
 }
 
-// Returns how long it took to decrease the value
 unsigned long TPL0102::decMicros() {
 
   return _decDelay;
 
 }
 
-// Returns how long it took to set the value
 unsigned long TPL0102::setMicros() {
 
   return _setDelay;
 
 }
 
-// Keeps a record of the current tap being addressed
 uint8_t TPL0102::taps(uint8_t ch) {
 
   _selectedChannel = ch;
@@ -272,7 +297,6 @@ uint8_t TPL0102::taps(uint8_t ch) {
   return _tapPointer[ch];   // value within [1-64] that points to the taps between resistors [0,63]
 }
 
-// Set a desired resistance --> EXTREMELY APPROXIMATE AND THEORETICAL. USE WITH CARE!
 uint8_t TPL0102::setValue(uint8_t ch, float desiredR) {
 
   float distance;
@@ -280,7 +304,7 @@ uint8_t TPL0102::setValue(uint8_t ch, float desiredR) {
 
   unsigned long _startSetTime = micros();
 
-  tapTarget = round((desiredR * TAP_NUMBER) / NOMINAL_RESISTANCE);
+  tapTarget = round((desiredR * TPL0102_TAP_NUMBER) / _nominalResistance);
   distance = abs(_tapPointer[ch] - tapTarget);
 
   if (_debug){
@@ -308,8 +332,41 @@ uint8_t TPL0102::setValue(uint8_t ch, float desiredR) {
 
 }
 
-// Select a specific channel and return the value that was selected.
-// Dumb-ish but useful(ish)
+uint8_t TPL0102::setTap(uint8_t ch, uint8_t desiredTap) {
+
+  float distance;
+  int tapTarget;
+
+  unsigned long _startSetTime = micros();
+
+  tapTarget = desiredTap;
+  distance = abs(_tapPointer[ch] - tapTarget);
+
+  if (_debug){
+
+  Serial.print(F("Distance to target: "));
+  Serial.println(distance);
+
+  Serial.print(F("Target tap: "));
+  Serial.println(tapTarget);
+
+  }
+
+   if (tapTarget != _tapPointer[ch]) {
+
+    dataWrite(ch, tapTarget);
+    _tapPointer[ch] = tapTarget;
+
+  } else {
+    // Leave everything where it is
+  }
+
+  _setDelay = micros() - _startSetTime;
+
+  return tapTarget;
+
+}
+
 uint8_t TPL0102::setChannel(uint8_t ch){
 
   _selectedChannel = ch;
@@ -322,7 +379,6 @@ uint8_t TPL0102::setChannel(uint8_t ch){
 
 }
 
-// Turn the pot all the way down
 void TPL0102::zeroWiper(uint8_t ch) {
 
   _selectedChannel = ch;
@@ -332,26 +388,23 @@ void TPL0102::zeroWiper(uint8_t ch) {
 
 }
 
-// Turn the pot all the way up
 void TPL0102::maxWiper(uint8_t ch) {
 
   _selectedChannel = ch;
 
-    _tapPointer[ch] = TAP_NUMBER;
+    _tapPointer[ch] = TPL0102_TAP_NUMBER;
   dataWrite(ch, _tapPointer[ch]);
 
 }
 
-// Get the theoretical current resistance value
 float TPL0102::readValue(uint8_t ch) {
 
   _selectedChannel = ch;
 
-  return (_tapPointer[ch] / TAP_NUMBER) * (NOMINAL_RESISTANCE);
+  return (_tapPointer[ch] / TPL0102_TAP_NUMBER) * (_nominalResistance);
 
 }
 
-// Check the values from the system registers
 void TPL0102::readRegistersStatus() {
 
   for (int pos = 0; pos < 3; pos++) {
@@ -388,7 +441,6 @@ void TPL0102::readRegistersStatus() {
 
 }
 
-// Check the values from the user registers
 void TPL0102::readDummyRegStatus() {
 
   for (int dummyPos = GENERAL_PURPOSE_START; dummyPos <= GENERAL_PURPOSE_END; dummyPos++) {
@@ -421,9 +473,6 @@ void TPL0102::readDummyRegStatus() {
   }
 }
 
-// Switch ON/OFF the LEDs attached to the board or
-// close to the pots being used. 
-
 void TPL0102::toggleLED(uint8_t ch){
 
   switch(ch){
@@ -449,5 +498,3 @@ void TPL0102::toggleLED(uint8_t ch){
   break;
 }
 }
-
-
