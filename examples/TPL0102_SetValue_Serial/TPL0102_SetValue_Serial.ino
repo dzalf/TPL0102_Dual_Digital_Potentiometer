@@ -42,19 +42,13 @@ bool debug = false;           // Enable it to get debugging "powers"
 bool serialFinished = false;  // Indicates when serial value has been received upon finding \n
 
 Bounce sel = Bounce();    // Instantiate a new debouncing object
-TPL0102 pot(debug);       // Instantiate a new awesome pot
+TPL0102 pot = TPL0102(potA_LED, potB_LED, debug);       // Instantiate a new awesome pot
 
 void setup() {
 
   Serial.begin(115200);
 
   pinMode(pinSel, INPUT_PULLUP);
-
-  pinMode(potA_LED, OUTPUT);
-  pinMode(potB_LED, OUTPUT);
-
-  digitalWrite(potA_LED, LOW);
-  digitalWrite(potB_LED, LOW);
 
   // Assign push button to object
   sel.attach(pinSel);
@@ -95,7 +89,9 @@ void loop() {
       if (chanPtr > 1)
         chanPtr = 0;
 
-      Serial.print(pot.POT_LABELS[chanPtr]);
+	  pot.setChannel(chanPtr);
+	  
+	  Serial.print(pot.POT_LABELS[chanPtr]);
       Serial.println(pot.taps(chanPtr));
 
       toggleLeds();
