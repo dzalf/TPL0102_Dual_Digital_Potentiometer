@@ -1,11 +1,21 @@
 
-/*
+/*    
+      Code: TPL_DevBoardTest.ino
+      Author: dzalf
+      Descriptin: This code reads a value from the serial port and sends it to the device to
+      set the most approximate value based on the datasheet tap/resistance relation
+      
       TI TPL0102 Dev Board Test Example
+      
+      Date: July
+      
+      License: MIT
 */
 
 #include <TPL0102.h>
 
 #define TPL0102_ADDRESS 0x50 //0x5x where x is 0-7 according to A2A1A0 (I removed this from header to allow multiple pots in the same I2C bus)
+#define MEASURED_RES 99850.0
 
 /* **** VARIABLES *******************/
 // Floats
@@ -34,22 +44,20 @@ bool incFlag = false;
 bool decFlag = false;
 bool serialFinished = false;
 
-TPL0102 pot(PotALED, PotBLED);
+TPL0102 pot = TPL0102(PotALED, PotBLED);
 
 void setup() {
 
   Serial.begin(115200);
 
-  pot.begin(TPL0102_ADDRESS, FAST);
-
-  /*
+  pot.begin(TPL0102_ADDRESS, MEASURED_RES, FAST);
+  
+      // Zero both channels
   for (int i = 0; i < 2; i++) {
     pot.zeroWiper(i);
-    delay(200);
+    delay(100);
   }
-
-  */
-  
+      
   delay(200);
 
   Serial.println(F("****************************************"));
