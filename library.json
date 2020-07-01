@@ -14,7 +14,7 @@
         "type": "git",
          "url": "https://github.com/dzalf/TPL0102_Dual_Digital_Potentiometer"
     },
-    "version": "0.2",
+    "version": "1.1.1",
     "homepage": "https://github.com/dzalf/TPL0102_Dual_Digital_Potentiometer/archive/master.zip",
     "frameworks": "Arduino",
     "examples": [
