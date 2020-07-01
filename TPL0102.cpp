@@ -250,6 +250,7 @@ void TPL0102::dec(uint8_t ch) {
   }
 }
 
+// Writing data to the user registers
 void TPL0102::dataWrite(uint8_t ch, uint8_t val){
 
   _selectedChannel = ch;
@@ -274,24 +275,28 @@ void TPL0102::dataWrite(uint8_t ch, uint8_t val){
 
 }
 
+// Returns how long it took to increase the value
 unsigned long TPL0102::incMicros() {
 
   return _incDelay;
 
 }
 
+// Returns how long it took to decrease the value
 unsigned long TPL0102::decMicros() {
 
   return _decDelay;
 
 }
 
+// Returns how long it took to set the value
 unsigned long TPL0102::setMicros() {
 
   return _setDelay;
 
 }
 
+// Keeps a record of the current tap being addressed
 uint8_t TPL0102::taps(uint8_t ch) {
 
   _selectedChannel = ch;
@@ -299,6 +304,7 @@ uint8_t TPL0102::taps(uint8_t ch) {
   return _tapPointer[ch];   // value within [1-64] that points to the taps between resistors [0,63]
 }
 
+// Set a desired resistance --> EXTREMELY APPROXIMATE AND THEORETICAL. USE WITH CARE!
 uint8_t TPL0102::setValue(uint8_t ch, float desiredR) {
 
   float distance;
@@ -369,6 +375,9 @@ uint8_t TPL0102::setTap(uint8_t ch, uint8_t desiredTap) {
 
 }
 
+// Select a specific channel and return the value that was selected.
+// Dumb-ish but useful(ish)
+
 uint8_t TPL0102::setChannel(uint8_t ch){
 
   _selectedChannel = ch;
@@ -381,6 +390,7 @@ uint8_t TPL0102::setChannel(uint8_t ch){
 
 }
 
+// Turn the pot all the way down
 void TPL0102::zeroWiper(uint8_t ch) {
 
   _selectedChannel = ch;
@@ -390,6 +400,7 @@ void TPL0102::zeroWiper(uint8_t ch) {
 
 }
 
+// Turn the pot all the way up
 void TPL0102::maxWiper(uint8_t ch) {
 
   _selectedChannel = ch;
@@ -399,6 +410,7 @@ void TPL0102::maxWiper(uint8_t ch) {
 
 }
 
+// Get the theoretical current resistance value
 float TPL0102::readValue(uint8_t ch) {
 
   _selectedChannel = ch;
@@ -407,6 +419,7 @@ float TPL0102::readValue(uint8_t ch) {
 
 }
 
+// Check the values from the system registers
 void TPL0102::readRegistersStatus() {
 
   for (int pos = 0; pos < 3; pos++) {
@@ -443,6 +456,7 @@ void TPL0102::readRegistersStatus() {
 
 }
 
+// Check the values from the user registers
 void TPL0102::readDummyRegStatus() {
 
   for (int dummyPos = GENERAL_PURPOSE_START; dummyPos <= GENERAL_PURPOSE_END; dummyPos++) {
@@ -475,6 +489,8 @@ void TPL0102::readDummyRegStatus() {
   }
 }
 
+// Switch ON/OFF the LEDs attached to the board or
+// close to the pots being used. 
 void TPL0102::toggleLED(uint8_t ch){
 
   switch(ch){
