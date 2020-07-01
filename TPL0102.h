@@ -73,7 +73,7 @@ class TPL0102 {
 
     // Destructor 
 
-    ~TPL0102(void);
+    // ~TPL0102(void);
 
     // Variables
 
