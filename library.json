@@ -1,0 +1,23 @@
+{
+    "name": "TPL0102",
+    "description": "Dual Digital Potentiometer HAL library",
+    "keywords": "Digital Potentiometer, Texas Instruments",
+    "authors": [   
+        {
+            "name": "Daniel Melendrez",
+            "email": "dmelendrez@gmail.com",
+            "url": "https://github.com/dzalf",
+            "maintainer": true
+        }
+    ],
+    "repository": {
+        "type": "git",
+         "url": "https://github.com/dzalf/TPL0102_Dual_Digital_Potentiometer"
+    },
+    "version": "0.2",
+    "homepage": "https://github.com/dzalf/TPL0102_Dual_Digital_Potentiometer",
+    "frameworks": "Arduino",
+    "examples": [
+        "examples/*/*.ino"
+    ]
+}
