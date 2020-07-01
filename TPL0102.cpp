@@ -3,9 +3,9 @@
     Simple two-wire UP/DOWN interface
     Author: Daniel Melendrez
     Date: March 2020 (COVID-19 Vibes)
-    Version history:    0.1 - March 18 - Initial commit
-                        0.2 - March 18 - Added FAST mode to the I2C comm: help to set the value in less than 100 usec
-                        0.3 - added a new overloaded setup for overriding the resistance value 
+    Version history:    1.1.1 - March 18 - Initial commit
+                        1.2.1 - March 18 - Added FAST mode to the I2C comm: help to set the value in less than 100 usec
+                        1.2.2 - added a new overloaded setup for overriding the resistance value 
     License: MIT                
 
 */
